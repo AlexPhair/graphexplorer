@@ -4,7 +4,6 @@ from django.db import models
 class GraphEntity(models.Model):
     wikidataId = models.CharField("Wikidata Id", max_length=255, primary_key=True)
     label = models.CharField("Label", max_length=255)
-    # type? TODO: Check whether this would make life easier
 
     def __str__(self) -> str:
         return f"{self.wikidataId}: {self.label}"

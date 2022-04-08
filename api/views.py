@@ -33,8 +33,6 @@ class VerifyAuthTokenPermissions(APIView):
 
         return Response(payload)
 
-# TODO: Read from wikidata if records aren't found and cache them in the DB.
-# TODO: Permissions: Which need admin access only? Use IsAdminUser
 class GraphEntityList(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (UserPermissions,)
@@ -80,7 +78,6 @@ class GraphEntityDetail(APIView):
         return Response(serializer.data)
 
 
-    # TODO: Validation
     def put(self, request, *args, **kwargs):
         try:
             graphEntity = GraphEntity.objects.get(wikidataId=args[0])
