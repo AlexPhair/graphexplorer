@@ -36,3 +36,13 @@
     transform: rotate(360deg);
   }
 }
+
+/* Header Nav */
+.navbar-nav .nav-item .nav-link {
+  display: inline-block;
+}
+.navbar-nav .nav-item:not(:last-child)::after {
+  content: '/';
+  display: inline-block;
+  color: rgba(255,255,255,.55);
+}

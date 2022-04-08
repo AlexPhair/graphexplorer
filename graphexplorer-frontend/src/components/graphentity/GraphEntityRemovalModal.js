@@ -4,6 +4,7 @@ import { Modal, ModalHeader, Button, ModalFooter } from "reactstrap";
 import axios from "axios";
 
 import { GRAPH_ENTITY_API_URL } from "../../constants";
+import Utilities from "../../helpers/Utilities";
 
 class GraphEntityRemovalModal extends Component {
   state = {
@@ -17,16 +18,17 @@ class GraphEntityRemovalModal extends Component {
   };
 
   deleteGraphEntity = wikidataId => {
-    axios.delete(GRAPH_ENTITY_API_URL + wikidataId).then(() => {
-      this.props.resetState();
-      this.toggle();
-    });
+    Utilities.getAuthenticatedAxiosRequest()    
+      .delete(GRAPH_ENTITY_API_URL + wikidataId).then(() => {
+        this.props.resetState();
+        this.toggle();
+      });
   };
 
   render() {
     return (
       <Fragment>
-        <Button color="danger" onClick={() => this.toggle()}>
+        <Button className="ms-2" color="danger" onClick={() => this.toggle()}>
           Remove
         </Button>
         <Modal isOpen={this.state.active} toggle={this.toggle}>

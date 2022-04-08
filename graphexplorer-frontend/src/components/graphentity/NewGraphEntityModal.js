@@ -23,7 +23,6 @@ class NewGraphEntityModal extends React.Component {
             button = (
                 <Button
                   color="primary"
-                  className="float-right"
                   onClick={this.toggle}
                   style={{ minWidth: "200px" }}
                 >
@@ -46,6 +45,7 @@ class NewGraphEntityModal extends React.Component {
                     resetState={this.props.resetState}
                     toggle={this.toggle}
                     graphentity={this.props.graphentity}
+                    create={create}
                   />
                 </ModalBody>
               </Modal>

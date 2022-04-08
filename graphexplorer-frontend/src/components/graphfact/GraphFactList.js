@@ -7,8 +7,11 @@ import GraphFactRemovalModal from "./GraphFactRemovalModal";
 class GraphFactList extends React.Component {
     render() {
         const graphfacts = this.props.graphfacts;
-        const graphentities = this.props.graphentities;
 
+        if (this.props.graphfacts.length <= 0) {
+          return <p className="lead">There are currently no facts for this entity.</p>
+        }
+        
         // TODO: Display labels instead of Ids
         return (
             <Table dark>
@@ -37,7 +40,6 @@ class GraphFactList extends React.Component {
                         <NewGraphFactModal
                           create={false}
                           graphfact={graphfact}
-                          graphentities={graphentities}
                           resetState={this.props.resetState}
                         />
                         &nbsp;&nbsp;

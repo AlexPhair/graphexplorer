@@ -4,6 +4,7 @@ import { Modal, ModalHeader, Button, ModalFooter } from "reactstrap";
 import axios from "axios";
 
 import { GRAPH_FACT_API_URL } from "../../constants";
+import Utilities from "../../helpers/Utilities";
 
 class GraphFactRemovalModal extends Component {
   state = {
@@ -17,10 +18,11 @@ class GraphFactRemovalModal extends Component {
   };
 
   deleteGraphFact = id => {
-    axios.delete(GRAPH_FACT_API_URL + id).then(() => {
-      this.props.resetState();
-      this.toggle();
-    });
+    Utilities.getAuthenticatedAxiosRequest()
+      .delete(GRAPH_FACT_API_URL + id).then(() => {
+        this.props.resetState();
+        this.toggle();
+      });
   };
 
   render() {

@@ -1,23 +1,64 @@
 from multiprocessing import context
-import re
+from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from rest_framework import status
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
+from rest_framework.views import APIView
+from rest_framework.authentication import TokenAuthentication
+from django.db.models import Q
+
+from api.wikidata_helper import WikidataHelper     
 
 from .models import GraphEntity, GraphFact
-from .serializers import GraphEntitySerializer, GraphFactSerializer
+from .serializers import GraphEntitySerializer, GraphFactSerializer, RegisterSerializer
+from .permissions import UserPermissions
+
+# Auth
+class AuthRegister(generics.CreateAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = RegisterSerializer
+
+class VerifyAuthTokenPermissions(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (UserPermissions,)
+
+    def post(self, request, *args, **kwargs):
+        is_authenticated = IsAuthenticated.has_permission(self, request, self)
+        is_admin = IsAdminUser.has_permission(self, request, self)
+
+        payload = {
+            'is_authenticated': is_authenticated,
+            'is_admin': is_admin
+        }
+
+        return Response(payload)
 
 # TODO: Read from wikidata if records aren't found and cache them in the DB.
+# TODO: Permissions: Which need admin access only? Use IsAdminUser
+class GraphEntityList(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (UserPermissions,)
 
-# Graph Entities
-@api_view(['GET', 'POST'])
-def graphentity_list(request):
-    if request.method == 'GET':
-        data = GraphEntity.objects.all()
+    def get(self, request, *args, **kwargs):
+        if 'query' in request.GET:
+            query = request.GET['query']
+
+            wikidataEntities = WikidataHelper.queryWikidataEntities(query)
+            for wikidataEntity in wikidataEntities:
+                if GraphEntity.objects.filter(wikidataId=wikidataEntity['wikidataId']).exists():
+                    continue
+
+                newEntity = GraphEntity(wikidataEntity['wikidataId'], wikidataEntity['label'])
+                newEntity.save()
+
+            data = GraphEntity.objects.filter(Q(wikidataId__contains=query) | Q(label__contains=query))
+        else:
+            data = GraphEntity.objects.all()
+
         serializer = GraphEntitySerializer(data, context={'request': request}, many=True)
         return Response(serializer.data)
 
-    if request.method == 'POST':
+    def post(self, request, *args, **kwargs):
         serializer = GraphEntitySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -25,41 +66,53 @@ def graphentity_list(request):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['PUT', 'DELETE'])
-def graphentity_detail(request, wikidataId):
-    try:
-        graphEntity = GraphEntity.objects.get(wikidataId=wikidataId)
-    except GraphEntity.DoesNotExist as e:
-        return Response(e, status=status.HTTP_400_BAD_REQUEST)
-    
-    if request.method == 'PUT':
+class GraphEntityDetail(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (UserPermissions,)
+
+    def get(self, request, *args, **kwargs):
+        try:
+            graphEntity = GraphEntity.objects.get(wikidataId=args[0])
+        except GraphFact.DoesNotExist as e:
+            return Response(e, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = GraphEntitySerializer(graphEntity, context={'request': request})
+        return Response(serializer.data)
+
+
+    # TODO: Validation
+    def put(self, request, *args, **kwargs):
+        try:
+            graphEntity = GraphEntity.objects.get(wikidataId=args[0])
+        except GraphEntity.DoesNotExist as e:
+            return Response(e, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = GraphEntitySerializer(graphEntity, data=request.data, context={'request': request})
         if serializer.is_valid():
-            # If we're changing the Primary Key, delete the old record before saving the new one.
-            # This may cause a race condition in a high-traffic production system, but it works for our use case.
-            # TODO: Improve
-            if wikidataId != request.data['wikidataId']:
-                graphEntity.delete()
-
             serializer.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    if request.method == 'DELETE':
+    def delete(self, request, *args, **kwargs):
+        try:
+            graphEntity = GraphEntity.objects.get(wikidataId=args[0])
+        except GraphEntity.DoesNotExist as e:
+            return Response(e, status=status.HTTP_400_BAD_REQUEST)
+
         graphEntity.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-# Graph Facts
-@api_view(['GET', 'POST'])
-def graphfact_list(request):
-    if request.method == 'GET':
+class GraphFactList(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
         data = GraphFact.objects.all()
         serializer = GraphFactSerializer(data, context={'request': request}, many=True)
-        print(serializer.data)
         return Response(serializer.data)
 
-    if request.method == 'POST':
+    def post(self, request, *args, **kwargs):
         serializer = GraphFactSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -67,14 +120,25 @@ def graphfact_list(request):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['PUT', 'DELETE'])
-def graphfact_detail(request, id):
-    try:
-        graphFact = GraphFact.objects.get(id=id)
-    except GraphFact.DoesNotExist as e:
-        return Response(e, status=status.HTTP_400_BAD_REQUEST)
+class GraphFactDetail(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        try:
+            graphFacts = GraphFact.objects.filter(Q(leftEntity = args[0]) | Q(property = args[0]) | Q(rightEntity = args[0]))
+        except GraphFact.DoesNotExist as e:
+            return Response(e, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = GraphFactSerializer(graphFacts, context={'request': request}, many=True)
+        return Response(serializer.data)
+
+    def put(self, request, *args, **kwargs):
+        try:
+            graphFact = GraphFact.objects.get(id=args[0])
+        except GraphFact.DoesNotExist as e:
+            return Response(e, status=status.HTTP_400_BAD_REQUEST)
     
-    if request.method == 'PUT':
         serializer = GraphFactSerializer(graphFact, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
@@ -82,6 +146,11 @@ def graphfact_detail(request, id):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    if request.method == 'DELETE':
+    def delete(self, request, *args, **kwargs):
+        try:
+            graphFact = GraphFact.objects.get(id=args[0])
+        except GraphFact.DoesNotExist as e:
+            return Response(e, status=status.HTTP_400_BAD_REQUEST)
+
         graphFact.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

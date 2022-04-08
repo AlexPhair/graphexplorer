@@ -4,6 +4,7 @@ import {Button, Form, FormGroup, Input, Label } from "reactstrap";
 import axios from 'axios';
 
 import { GRAPH_ENTITY_API_URL } from "../../constants";
+import Utilities from "../../helpers/Utilities";
 
 class NewGraphEntityForm extends React.Component {
     state = {
@@ -25,18 +26,24 @@ class NewGraphEntityForm extends React.Component {
     // TODO: Only allow Q/P IDs
     createGraphEntity = e => {
         e.preventDefault();
-        axios.post(GRAPH_ENTITY_API_URL, this.state).then(() => {
-            this.props.resetState();
-            this.props.toggle();
-        })
+        
+        Utilities.getAuthenticatedAxiosRequest()
+          .post(GRAPH_ENTITY_API_URL, this.state)
+          .then(() => {
+              this.props.resetState();
+              this.props.toggle();
+          });
     }
 
     editGraphEntity = e => {
         e.preventDefault();
-        axios.put(GRAPH_ENTITY_API_URL + this.props.graphentity.wikidataId, this.state).then(() => {
+
+        Utilities.getAuthenticatedAxiosRequest()
+          .put(GRAPH_ENTITY_API_URL + this.props.graphentity.wikidataId, this.state)
+          .then(() => {
             this.props.resetState();
             this.props.toggle();
-        })
+          });
     }
 
     render() {
@@ -49,6 +56,7 @@ class NewGraphEntityForm extends React.Component {
                 name="wikidataId"
                 onChange={this.onChange}
                 value={this.state.wikidataId}
+                disabled={!this.props.create}
               />
             </FormGroup>
             <FormGroup>

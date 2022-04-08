@@ -3,6 +3,7 @@ import {Button, Form, FormGroup, Input, Label } from "reactstrap";
 import axios from 'axios';
 
 import { GRAPH_FACT_API_URL } from "../../constants";
+import Utilities from "../../helpers/Utilities";
 
 class NewGraphEntityForm extends React.Component {
     state = {
@@ -25,18 +26,20 @@ class NewGraphEntityForm extends React.Component {
 
     createGraphFact = e => {
         e.preventDefault();
-        axios.post(GRAPH_FACT_API_URL, this.state).then(() => {
-            this.props.resetState();
-            this.props.toggle();
-        })
+        Utilities.getAuthenticatedAxiosRequest()
+            .post(GRAPH_FACT_API_URL, this.state).then(() => {
+                this.props.resetState();
+                this.props.toggle();
+            })
     }
 
     editGraphFact = e => {
         e.preventDefault();
-        axios.put(GRAPH_FACT_API_URL + this.props.graphfact.id, this.state).then(() => {
-            this.props.resetState();
-            this.props.toggle();
-        })
+        Utilities.getAuthenticatedAxiosRequest()
+            .put(GRAPH_FACT_API_URL + this.props.graphfact.id, this.state).then(() => {
+                this.props.resetState();
+                this.props.toggle();
+            })
     }
 
     render() {
