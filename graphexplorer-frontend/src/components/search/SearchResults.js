@@ -8,12 +8,11 @@ import  { Navigate } from 'react-router-dom'
 import { Col, Row } from "reactstrap";
 import NewGraphEntityModal from "../graphentity/NewGraphEntityModal";
 
-const SearchResults = () => {
+const SearchResults = props => {
     const [queryResults, setQueryResults] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [searchParams] = useSearchParams();
 
-    const is_logged_in = Utilities.isLoggedIn();
     const query = searchParams.get("query");
 
     const updateQueryResults = () => {
@@ -53,7 +52,7 @@ const SearchResults = () => {
                 </Col>
             </Row>
             {
-                !is_logged_in  && <Navigate to="/"/>
+                !props.is_logged_in  && <Navigate to="/"/>
             }
         </React.Fragment> 
     );

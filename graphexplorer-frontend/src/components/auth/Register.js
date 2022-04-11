@@ -118,6 +118,7 @@ class Register extends Component {
                     </Form>
                 </Card>
                 { this.state.success && <Navigate to="/login" state={{new_account: true, username: this.state.form_data.username}}/> }
+                { this.props.is_logged_in  && <Navigate to="/"/> }
             </React.Fragment>
         );
     }

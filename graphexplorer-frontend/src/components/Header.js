@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { Collapse, Nav, NavItem, Navbar, NavbarBrand, NavbarToggler, NavLink } from "reactstrap";
+import { Link } from "react-router-dom";
+import { Collapse, Nav, NavItem, Navbar, NavbarToggler } from "reactstrap";
 import Utilities from "../helpers/Utilities";
 class Header extends Component {
   constructor(props) {
@@ -8,13 +9,8 @@ class Header extends Component {
     this.onLogout = this.onLogout.bind(this);
     this.toggle = this.toggle.bind(this);
     this.state = {
-      isOpen: false,
-      is_logged_in: false
+      isOpen: false
     };
-  }
-
-  componentDidMount() {
-    this.setState({ is_logged_in: Utilities.isLoggedIn() })
   }
 
   toggle() {
@@ -30,25 +26,23 @@ class Header extends Component {
   render() {
     return (
       <Navbar color="dark" dark expand="md">
-        <NavbarBrand href="/">Graph Explorer</NavbarBrand>
-
+        <Link to="/" className="navbar-brand">Graph Explorer</Link>
               <NavbarToggler onClick={this.toggle} />
-
               <Collapse className="justify-content-end" isOpen={this.state.isOpen} navbar>
                 <Nav navbar>
                   {
-                    !this.state.is_logged_in ? (
+                    !this.props.is_logged_in ? (
                       <React.Fragment>
                         <NavItem>
-                          <NavLink href="/register">Register</NavLink>
+                          <Link to="/register" className="nav-link">Register</Link>
                         </NavItem>
                         <NavItem>
-                          <NavLink href="/login">Login</NavLink>
+                          <Link to="/login" className="nav-link">Login</Link>
                         </NavItem>
                       </React.Fragment>
                     ) : (
                       <NavItem>
-                        <NavLink href="/" onClick={this.onLogout}>Logout</NavLink>
+                        <Link to="/" className="nav-link" onClick={this.onLogout}>Logout</Link>
                       </NavItem>
                     )
                   }

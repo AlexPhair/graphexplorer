@@ -84,7 +84,8 @@ class Login extends Component {
                     </Form>
                 </Card>
                 
-                {this.state.token !== '' && <Navigate to="/"/>}
+                { this.state.token !== '' && <Navigate to="/"/> }
+                { this.props.is_logged_in  && <Navigate to="/"/> }
             </React.Fragment>
         );
     }

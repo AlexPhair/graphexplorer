@@ -1,8 +1,6 @@
 import React from "react";
 import {Button, Form, FormGroup, Input, Label } from "reactstrap";
 
-import axios from 'axios';
-
 import { GRAPH_ENTITY_API_URL } from "../../constants";
 import Utilities from "../../helpers/Utilities";
 

@@ -1,42 +1,19 @@
 import React, { Component } from "react";
-import { Card, CardBody, CardFooter, CardLink, Col, Container, Row} from "reactstrap";
+import { Card, CardBody, CardFooter, Col, Container, Row} from "reactstrap";
 
-// import GraphEntityList from "./graphentity/GraphEntityList";
-// import NewGraphEntityModal from "./graphentity/NewGraphEntityModal";
-
-import axios from "axios";
-
-import { GRAPH_ENTITY_API_URL, GRAPH_FACT_API_URL } from "../constants";
 import SearchBar from "./search/SearchBar";
-import Utilities from "../helpers/Utilities";
-// import GraphFactList from "./graphfact/GraphFactList";
-// import NewGraphFactModal from "./graphfact/NewGraphFactModal";
+import { Link } from "react-router-dom";
 
 class Home extends Component {
 
   constructor(props) {
     super(props);
 
-    this.getGraphFacts = this.getGraphFacts.bind(this);
-    this.resetState = this.resetState.bind(this);
     this.state = {
-      is_logged_in: false,
       graphentities: [],
       graphfacts: [],
     };
   }
-
-  componentDidMount() {
-    this.resetState();
-  }
-
-  getGraphFacts = () => {
-    axios.get(GRAPH_FACT_API_URL).then(res => this.setState({ graphfacts: res.data }));
-  };
-
-  resetState = () => {
-    this.setState({ is_logged_in: Utilities.isLoggedIn() })
-  };
 
   render() {
     return (
@@ -48,11 +25,11 @@ class Home extends Component {
                 <h1 className="card-title display-2">Graph Explorer</h1>
                 <p className="lead">Explore Facts and Entities from Wikidata and make edits</p>
                 {
-                  !this.state.is_logged_in &&
+                  !this.props.is_logged_in &&
                     (
                       <React.Fragment>
-                        <CardLink className="btn btn-outline-dark" href="/register">Register</CardLink>
-                        <CardLink className="btn btn-outline-dark" href="/login">Login</CardLink>
+                        <Link className="btn btn-outline-dark card-link" to="/register">Register</Link>
+                        <Link className="btn btn-outline-dark card-link" to="/login">Login</Link>
                       </React.Fragment>
                     )
                 }
@@ -63,7 +40,7 @@ class Home extends Component {
           </Col>
 
           {
-            this.state.is_logged_in && (
+            this.props.is_logged_in && (
               <Col xs="12">
                 <SearchBar/>
               </Col>

@@ -16,6 +16,7 @@ Including another URLconf
 from django.urls import re_path
 from rest_framework.authtoken import views as auth_views
 from api import views as api_views
+from . import views
 
 urlpatterns = [
     # Auth
@@ -30,4 +31,7 @@ urlpatterns = [
     # Graph Facts
     re_path(r'^api/graphfact/$', api_views.GraphFactList.as_view()),
     re_path(r'^api/graphfact/([QP]?[0-9]+)$', api_views.GraphFactDetail.as_view()),
+
+    # Frontend
+    re_path('', views.index)
 ]

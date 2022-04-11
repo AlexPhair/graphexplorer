@@ -1,8 +1,6 @@
 import React, { Component, Fragment } from "react";
 import { Modal, ModalHeader, Button, ModalFooter } from "reactstrap";
 
-import axios from "axios";
-
 import { GRAPH_FACT_API_URL } from "../../constants";
 import Utilities from "../../helpers/Utilities";
 

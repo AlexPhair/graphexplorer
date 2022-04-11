@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { Navigate, useParams } from "react-router";
 import { Col, Row } from "reactstrap";
 import { GRAPH_ENTITY_API_URL, GRAPH_FACT_API_URL } from "../constants";
 import Utilities from "../helpers/Utilities";
@@ -7,7 +7,7 @@ import NewGraphEntityModal from "./graphentity/NewGraphEntityModal";
 import GraphFactList from "./graphfact/GraphFactList"
 import NewGraphFactModal from "./graphfact/NewGraphFactModal";
 
-const ViewEntity = () => {
+const ViewEntity = props => {
     let { wikidataId } = useParams();
 
     let [ entity, setEntity ] = useState({});
@@ -54,6 +54,9 @@ const ViewEntity = () => {
                     <NewGraphFactModal create={true} resetState={resetState} />
                 </Col>
             </Row>
+            {
+                !props.is_logged_in  && <Navigate to="/"/>
+            }
         </React.Fragment>
     );
 }
